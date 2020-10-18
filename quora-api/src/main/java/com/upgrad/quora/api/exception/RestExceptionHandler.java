@@ -45,6 +45,12 @@ public class RestExceptionHandler {
                 new ErrorResponse().code(exe.getCode()).message(exe.getErrorMessage()), HttpStatus.NOT_FOUND
         );
     }
+	@ExceptionHandler(InvalidAnswerException.class)
+    public ResponseEntity<ErrorResponse> InvalidAnswerException(InvalidAnswerException exe, WebRequest request){
+        return new ResponseEntity<ErrorResponse>(
+                new ErrorResponse().code(exe.getCode()).message(exe.getErrorMessage()), HttpStatus.NOT_FOUND
+        );
+    }
 
     @ExceptionHandler(AnswerNotFoundException.class)
     public ResponseEntity<ErrorResponse> answerNotFoundException(AnswerNotFoundException exe, WebRequest request){
