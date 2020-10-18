@@ -29,6 +29,71 @@ public class AnswerController {
 
     @Autowired
     private AnswerService answerService;
+	
+	@RequestMapping(
+      method = RequestMethod.POST,
+      path = "/question/{questionId}/answer/create",
+      produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+  public ResponseEntity<AnswerResponse> createAnswer(
+      @RequestHeader("authorization") final String accessToken, AnswerRequest answerRequest)
+      throws AuthorizationFailedException {
+    AnswerEntity answerEntity = new AnswerEntity();
+    answerEntity.setContent(answerRequest.getContent());
+    answerEntity = answerService.createAnswer(answerEntity, accessToken);
+    AnswerResponse answerResponse = new AnswerResponse();
+    answerResponse.setId(answerEntity.getUuid());
+    answerResponse.setStatus("Answer Stored");
+    return new ResponseEntity<QuestionResponse>(answerResponse, HttpStatus.CREATED);
+  }
+
+  /**
+   * Get all questions posted by any user.
+   *
+   * @param accessToken access token to authenticate user.
+   * @return List of QuestionDetailsResponse
+   * @throws AuthorizationFailedException In case the access token is invalid.
+   */
+  @RequestMapping(
+      method = RequestMethod.GET,
+      path = "question/all/{userId}",
+      produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+  public ResponseEntity<List<QuestionDetailsResponse>> getAllQuestions(
+      @RequestHeader("authorization") final String accessToken)
+      throws AuthorizationFailedException {
+    List<QuestionEntity> questions = questionService.getAllQuestions(accessToken);
+    List<QuestionDetailsResponse> questionDetailResponses = new ArrayList<>();
+    for (QuestionEntity questionEntity : questions) {
+      QuestionDetailsResponse questionDetailResponse = new QuestionDetailsResponse();
+      questionDetailResponse.setId(questionEntity.getUuid());
+      questionDetailResponse.setContent(questionEntity.getContent());
+      questionDetailResponses.add(questionDetailResponse);
+    }
+    return new ResponseEntity<List<QuestionDetailsResponse>>(
+        questionDetailResponses, HttpStatus.OK);
+  }
+
+  /**
+   * Edit a answer
+   *
+
+   */
+  @RequestMapping(
+      method = RequestMethod.PUT,
+      path = "/answer/edit/{questionId}",
+      produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+  public ResponseEntity<QuestionEditResponse> editanswer(
+      @RequestHeader("authorization") final String accessToken,
+      @PathVariable("answerId") final String questionId,
+      AnswerEditRequest answerEditRequest)
+      throws AuthorizationFailedException, InvalidAnswerException {
+    AnswerEntity answerEntity =
+        answerService.editAnswer(accessToken, answerId, answerEditRequest.getContent());
+    AnswerEditResponse answerEditResponse = new AnswerEditResponse();
+    answerEditResponse.setId(answerEntity.getUuid());
+    answerEditResponse.setStatus("EDITED ANSWER");
+    return new ResponseEntity<AnswerEditResponse>(answerEditResponse, HttpStatus.OK);
+  }
+
 
     @GetMapping(path = "/answer/all/{questionId}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<AnswerDetailsResponse> getAllAnswersToQuestion(@RequestHeader("authorization") final String authorization,
