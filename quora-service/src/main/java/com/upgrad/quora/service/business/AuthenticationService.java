@@ -94,4 +94,10 @@ public class AuthenticationService {
     public UserEntity validateTokenForDeleteAnswerEndpoint(final String authorization) throws AuthorizationFailedException {
         return this.validateToken(authorization, ErrorMessage.USER_SIGNED_OUT_CAN_NOT_DELETE_AN_ANSWER);
     }
+	public UserEntity validateTokenForCreateAnswerEndpoint(final String authorization) throws AuthorizationFailedException {
+        return this.validateToken(authorization, ErrorMessage.USER_SIGNED_OUT_CAN_NOT_CREATEANSWER);
+    }
+	public UserEntity validateTokenForGetAllquestionsEndpoint(final String authorization) throws AuthorizationFailedException {
+        return this.validateToken(authorization, ErrorMessage.USER_SIGNED_OUT_CAN_NOT_GETALLQUESTIONS);
+    }
 }
