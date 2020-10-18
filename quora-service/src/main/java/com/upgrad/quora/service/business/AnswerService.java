@@ -30,6 +30,12 @@ public class AnswerService {
         answerDao.delete(answerEntity);
 
     }
+	public void createAnswer(AnswerEntity answerEntity) {
+		answerDao.createAnswer(answerEntity);
+	}
+	public void editAnswer(AnswerEntity answerEntity) {
+		answerDao.editAnswer(answerEntity);
+	}
 
     /** Authorize the delete operation on an answer
      * Only an owner or admin can delete the answer
