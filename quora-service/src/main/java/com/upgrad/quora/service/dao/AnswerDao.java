@@ -21,6 +21,10 @@ public class AnswerDao {
             return null;
         }
     }
+	   public AnswerEntity createAnswer(AnswerEntity answerEntity) {
+       entityManager.persist(answerEntity);
+       return answerEntity;
+   }
 
     public void delete(AnswerEntity answerEntity) {
         //answerEntity = entityManager.find(AnswerEntity.class, answerEntity.getId());
