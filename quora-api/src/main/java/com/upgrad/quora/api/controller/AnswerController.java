@@ -11,6 +11,7 @@ import com.upgrad.quora.service.entity.UserEntity;
 import com.upgrad.quora.service.exception.AnswerNotFoundException;
 import com.upgrad.quora.service.exception.AuthorizationFailedException;
 import com.upgrad.quora.service.exception.InvalidQuestionException;
+import com.upgrad.quora.service.exception.InvalidAnswerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -29,6 +30,73 @@ public class AnswerController {
 
     @Autowired
     private AnswerService answerService;
+	
+	@PostMapping(
+      path = "/question/{questionId}/answer/create",
+      produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+  public ResponseEntity<AnswerResponse> createAnswer(
+      @RequestHeader("authorization") final String accessToken, AnswerRequest answerRequest)
+      throws AuthorizationFailedException,InvalidAnswerException {
+	UserEntity userEntity = authenticationService.validateTokenForCreateAnswerEndpoint(authorization);	  
+    AnswerEntity answerEntity = new AnswerEntity();
+    answerEntity.setContent(answerRequest.getContent());
+    answerEntity = answerService.createAnswer(answerEntity, accessToken);
+    AnswerResponse answerResponse = new AnswerResponse();
+    answerResponse.setId(answerEntity.getUuid());
+    answerResponse.setStatus("Answer Stored");
+    return new ResponseEntity<AnswerResponse>(answerResponse, HttpStatus.CREATED);
+  }
+
+  /**
+   * Get all questions posted by any user.
+   *
+   * @param accessToken access token to authenticate user.
+   * @return List of QuestionDetailsResponse
+   * @throws AuthorizationFailedException In case the access token is invalid.
+   */
+  @GetMapping(
+      method = RequestMethod.GET,
+      path = "question/all/{userId}",
+      produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+  public ResponseEntity<List<QuestionDetailsResponse>> getAllQuestions(
+      @RequestHeader("authorization") final String accessToken)
+      throws AuthorizationFailedException,InvalidQuestionException {
+    UserEntity userEntity = authenticationService.validateTokenForGetAllquestionsEndpoint(authorization);		  
+    List<QuestionEntity> questions = questionService.getAllQuestions(accessToken);
+    List<QuestionDetailsResponse> questionDetailResponses = new ArrayList<>();
+    for (QuestionEntity questionEntity : questions) {
+      QuestionDetailsResponse questionDetailResponse = new QuestionDetailsResponse();
+      questionDetailResponse.setId(questionEntity.getUuid());
+      questionDetailResponse.setContent(questionEntity.getContent());
+      questionDetailResponses.add(questionDetailResponse);
+    }
+    return new ResponseEntity<List<QuestionDetailsResponse>>(
+        questionDetailResponses, HttpStatus.OK);
+  }
+
+  /**
+   * Edit a answer
+   *
+
+   */
+  @POSTMapping(
+      method = RequestMethod.PUT,
+      path = "/answer/edit/{questionId}",
+      produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+  public ResponseEntity<QuestionEditResponse> editAnswer(
+      @RequestHeader("authorization") final String accessToken,
+      @PathVariable("answerId") final String questionId,
+      AnswerEditRequest answerEditRequest)
+      throws AuthorizationFailedException, InvalidAnswerException {
+		  UserEntity userEntity = authenticationService.validateTokenForEditAnswerEndpoint(authorization);
+    AnswerEntity answerEntity =
+        answerService.editAnswer(accessToken, answerId, answerEditRequest.getContent());
+    AnswerEditResponse answerEditResponse = new AnswerEditResponse();
+    answerEditResponse.setId(answerEntity.getUuid());
+    answerEditResponse.setStatus("EDITED ANSWER");
+    return new ResponseEntity<AnswerEditResponse>(answerEditResponse, HttpStatus.OK);
+  }
+
 
     @GetMapping(path = "/answer/all/{questionId}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<AnswerDetailsResponse> getAllAnswersToQuestion(@RequestHeader("authorization") final String authorization,
